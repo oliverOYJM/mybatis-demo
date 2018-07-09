@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oliver.mybatis.demo.mapper.CountryMapper">
+    <select id="selectAll" resultType="Country">
+        select id,countryname,countrycode from country
+    </select>
+
+    <select id="selectByName"  resultType="Country">
+        <bind name="nameLike" value="'%'+name+'%'" />
+        select id,countryname,countrycode from country where countryname like #{nameLike}
+    </select>
+
+    <select id="selectByNameOrCode"  resultType="Country">
+        select id,countryname,countrycode from country
+        <where>
+            <choose>
+                <when test="name!=null and name!=''">
+                    and countryname=#{name,jdbcType=VARCHAR}
+                </when>
+                <when test="code!=null and code!=''">
+                    and countrycode=#{code,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    and 1=2
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="selectByIds"  resultType="Country">
+    select id,countryname,countrycode from country
+    <where>
+        <choose>
+            <when test="ids!=null and ids.size()>0">
+                id in
+                <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </when>
+            <otherwise>
+                1=2
+            </otherwise>
+        </choose>
+    </where>
+    </select>
+
+    <select id="testCallable1" statementType="CALLABLE" useCache="false">
+        {
+        call pro_1(
+            #{id,mode=IN,jdbcType=BIGINT}
+        )
+        }
+    </select>
+    <insert id="testCallable2" statementType="CALLABLE"></insert>
+    <delete id="testCallable3" statementType="CALLABLE"></delete>
+</mapper>
